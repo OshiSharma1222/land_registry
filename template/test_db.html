@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Database Test</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Database Test Results</h1>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h2>Tables in Database</h2>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    {% for table in tables %}
+                    <li class="list-group-item">
+                        <h3>{{ table['Tables_in_swabhoomi'] }}</h3>
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Field</th>
+                                    <th>Type</th>
+                                    <th>Null</th>
+                                    <th>Key</th>
+                                    <th>Default</th>
+                                    <th>Extra</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for field in table_info[table['Tables_in_swabhoomi']] %}
+                                <tr>
+                                    <td>{{ field['Field'] }}</td>
+                                    <td>{{ field['Type'] }}</td>
+                                    <td>{{ field['Null'] }}</td>
+                                    <td>{{ field['Key'] }}</td>
+                                    <td>{{ field['Default'] }}</td>
+                                    <td>{{ field['Extra'] }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

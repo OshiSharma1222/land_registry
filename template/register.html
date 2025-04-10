@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Register - SwaBhoomi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        .register-container {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 2rem 0;
+        }
+        .register-card {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            padding: 2.5rem;
+        }
+        .register-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .register-logo {
+            width: 120px;
+            margin-bottom: 1rem;
+        }
+        .register-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+        }
+        .register-subtitle {
+            color: #718096;
+            margin-bottom: 2rem;
+        }
+        .form-section {
+            background: #f8fafc;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 1rem;
+        }
+        .form-control {
+            padding: 0.8rem;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+        }
+        .form-control:focus {
+            border-color: #4a5568;
+            box-shadow: 0 0 0 2px rgba(74, 85, 104, 0.2);
+        }
+        .btn-primary {
+            background: #4299e1;
+            border: none;
+            padding: 0.8rem;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            background: #3182ce;
+            transform: translateY(-2px);
+        }
+        .did-options {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .did-option {
+            flex: 1;
+            padding: 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .did-option:hover {
+            border-color: #4299e1;
+            background: #ebf8ff;
+        }
+        .did-option.selected {
+            border-color: #4299e1;
+            background: #ebf8ff;
+        }
+        .did-option i {
+            font-size: 2rem;
+            color: #4a5568;
+            margin-bottom: 0.5rem;
+        }
+        .alert {
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="container">
+            <div class="register-card">
+                <div class="register-header">
+                    <img src="{{ url_for('static', filename='sblg-removebg (1).png') }}" alt="SwaBhoomi Logo" class="register-logo">
+                    <h2 class="register-title">Create Account</h2>
+                    <p class="register-subtitle">Join SwaBhoomi's secure land registry platform</p>
+                </div>
+
+                <!-- Flash Messages -->
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        <div class="alert alert-danger">
+                            <ul class="mb-0">
+                                {% for message in messages %}
+                                    <li>{{ message }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+                {% endwith %}
+
+                <form action="/register" method="POST">
+                    {{ form.hidden_tag() }}
+
+                    <!-- Personal Information Section -->
+                    <div class="form-section">
+                        <h3 class="section-title">Personal Information</h3>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                {{ form.first_name.label(class_='form-label') }}
+                                {{ form.first_name(class='form-control', placeholder='Enter your first name') }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.last_name.label(class_='form-label') }}
+                                {{ form.last_name(class='form-control', placeholder='Enter your last name') }}
+                            </div>
+                            <div class="col-12">
+                                {{ form.email.label(class_='form-label') }}
+                                {{ form.email(class='form-control', placeholder='Enter your email') }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.password.label(class_='form-label') }}
+                                {{ form.password(class='form-control', placeholder='Choose a password') }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.confirm_password.label(class_='form-label') }}
+                                {{ form.confirm_password(class='form-control', placeholder='Confirm your password') }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Digital Identity Section -->
+                    <div class="form-section">
+                        <h3 class="section-title">Digital Identity</h3>
+                        <p class="text-muted mb-3">Choose how you want to manage your digital identity</p>
+                        
+                        <div class="did-options">
+                            <div class="did-option" onclick="selectDIDOption('generate')">
+                                <i class="fas fa-plus-circle"></i>
+                                <h4>Generate New DID</h4>
+                                <p class="text-muted mb-0">Create a new digital identity</p>
+                            </div>
+                            <div class="did-option" onclick="selectDIDOption('link')">
+                                <i class="fas fa-link"></i>
+                                <h4>Link Existing Wallet</h4>
+                                <p class="text-muted mb-0">Connect your digital wallet</p>
+                            </div>
+                        </div>
+                        <input type="hidden" name="did_option" id="did_option" value="">
+                    </div>
+
+                    <!-- Address Section -->
+                    <div class="form-section">
+                        <h3 class="section-title">Address Information</h3>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                {{ form.street.label(class_='form-label') }}
+                                {{ form.street(class='form-control', placeholder='Enter street address') }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.city.label(class_='form-label') }}
+                                {{ form.city(class='form-control', placeholder='Enter city') }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.state.label(class_='form-label') }}
+                                {{ form.state(class='form-control', placeholder='Enter state') }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.country.label(class_='form-label') }}
+                                {{ form.country(class='form-control', placeholder='Enter country') }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.pincode.label(class_='form-label') }}
+                                {{ form.pincode(class='form-control', placeholder='Enter pincode') }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        {{ form.submit(class_='btn btn-primary btn-lg') }}
+                        <a href="/login" class="btn btn-outline-secondary">Already have an account? Login</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal fade" id="successModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title">Registration Successful!</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <i class="fas fa-check-circle text-success fa-4x mb-3"></i>
+                    <h4>Your DID has been created</h4>
+                    <p class="text-muted" id="userDID">did:example:123abc</p>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        Your Verifiable Credential has been issued and saved to your wallet
+                    </div>
+                    <button class="btn btn-primary" onclick="downloadVC()">
+                        <i class="fas fa-download"></i>
+                        Download Verifiable Credential
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function selectDIDOption(option) {
+            document.querySelectorAll('.did-option').forEach(el => el.classList.remove('selected'));
+            event.currentTarget.classList.add('selected');
+            document.getElementById('did_option').value = option;
+            
+            if (option === 'link') {
+                // Show wallet connection modal or trigger wallet connect
+                alert('Wallet connection feature coming soon!');
+            }
+        }
+
+        function downloadVC() {
+            // Placeholder for VC download logic
+            alert('VC download feature coming soon!');
+        }
+
+        // Show success modal after successful registration
+        {% if registration_success %}
+            var successModal = new bootstrap.Modal(document.getElementById('successModal'));
+            successModal.show();
+        {% endif %}
+    </script>
+</body>
+</html>

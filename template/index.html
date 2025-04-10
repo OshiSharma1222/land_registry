@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwaBhoomi - Blockchain Land Registry</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Google Translate Script -->
+<!-- Google Translate Script with Indian Languages -->
+<script type="text/javascript">
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement(
+        {
+          pageLanguage: 'en',
+          includedLanguages: 'en,hi,bn,te,mr,ta,ur,gu,kn,or,ml,pa,as,mai,kok,sa',
+          layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+        },
+        'google_translate_element'
+      );
+    }
+  </script>
+  
+  <script type="text/javascript" 
+    src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit">
+  </script>
+  
+  
+
+</head>
+<body>
+    <!-- Header / Navigation -->
+    <header class="header">
+        <nav class="nav-container">
+            <div class="logo">
+                <img src="{{ url_for('static', filename='sblg-removebg (1).png') }}" alt="SwaBhoomi Logo" class="logo-img">
+                <h1>SwaBhoomi</h1>
+            </div>
+            <div class="nav-links">
+                {% if session.get('user_id') %}
+                    <a href="/dashboard">Dashboard</a>
+                    <a href="#features">Features</a>
+                    <a href="#why-choose-us">Why Choose Us</a>
+                    <a href="#track">Track Transactions</a>
+                    <a href="/profile">Profile</a>
+                    <div id="google_translate_element"></div>
+                    <a href="/logout" class="logout-btn">Logout</a>
+                {% else %}
+                    <a href="#features" onclick="return checkLogin()">Features</a>
+                    <a href="#why-choose-us">Why Choose Us</a>
+                    <div id="google_translate_element"></div>
+                    <a href="/login" class="login-btn">Login</a>
+                    <a href="/register" class="register-btn">Register</a>
+                {% endif %}
+            </div>
+            <div class="mobile-menu">
+                <i class="fas fa-bars"></i>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Revolutionizing Land Ownership in India</h1>
+            <p>Building a transparent, secure, and inclusive land registry system powered by blockchain and AI</p>
+            <div class="hero-buttons">
+                <button class="cta-button primary">Explore Demo</button>
+                <button class="cta-button secondary">Learn More</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Us / Vision Section -->
+    <section class="about">
+        <div class="about-content">
+            <h2>Our Vision</h2>
+            <p>SwaBhoomi is transforming India's land registry system by leveraging cutting-edge technology to create a transparent, secure, and accessible platform for land ownership and transactions. We're solving the critical challenges of land fraud, unclear ownership, and bureaucratic inefficiencies that have plagued the system for decades.</p>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <h2>Key Features</h2>
+        <div class="feature-cards">
+            <div class="feature-card">
+                <i class="fas fa-shield-alt"></i>
+                <h3>Transparent Ownership Verification</h3>
+                <p>Verify land ownership instantly with blockchain technology</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-robot"></i>
+                <h3>AI-Based Fraud Detection</h3>
+                <p>Advanced AI algorithms to prevent fraudulent transactions</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-map-marker-alt"></i>
+                <h3>Real-time Geotagging</h3>
+                <p>Accurate land mapping with real-time geolocation</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-lock"></i>
+                <h3>Immutable Land Records</h3>
+                <p>Permanent, tamper-proof records on the blockchain</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Choose Us Section -->
+    <section id="why-choose-us" class="why-choose-us-section">
+    <h2>Why Choose SwaBhoomi?</h2>
+    <div class="choose-grid">
+        <div class="choose-item">
+            <i class="fas fa-shield-alt"></i>
+            <h3>Secure & Tamper-Proof</h3>
+            <p>Powered by blockchain and SSI, SwaBhoomi ensures every land record is encrypted, traceable, and fraud-resistant.</p>
+        </div>
+        <div class="choose-item">
+            <i class="fas fa-brain"></i>
+            <h3>AI-Driven Intelligence</h3>
+            <p>Real-time AI fraud detection and land valuation tools help automate and de-risk property transactions.</p>
+        </div>
+        <div class="choose-item">
+            <i class="fas fa-globe"></i>
+            <h3>Accessible & Inclusive</h3>
+            <p>Built with open-source tools, SwaBhoomi is scalable, cost-effective, and inclusive for all—urban and rural alike.</p>
+        </div>
+        <div class="choose-item">
+            <i class="fas fa-map-marked-alt"></i>
+            <h3>Geo-Integrated</h3>
+            <p>Geotagging and GIS mapping provide precise boundary visualization and real-world data overlay for clarity and accuracy.</p>
+        </div>
+        <div class="choose-item">
+            <i class="fas fa-user-shield"></i>
+            <h3>User-Centric Identity</h3>
+            <p>Self-Sovereign Identity puts you in control—share only what's needed, when it's needed, with complete privacy.</p>
+        </div>
+        <div class="choose-item">
+            <i class="fas fa-leaf"></i>
+            <h3>Eco & Legal Compliant</h3>
+            <p>Environmental zoning, regulation tracking, and smart compliance features ensure every deal respects the planet and the law.</p>
+        </div>
+    </div>
+    </section>
+
+    <!-- Use Cases Section -->
+    <section class="use-cases">
+        <div class="section-content">
+            <h2>Who It's For</h2>
+            <div class="use-cases-grid">
+                <div class="use-case-card">
+                    <i class="fas fa-user-tie"></i>
+                    <h3>Landowners & Farmers</h3>
+                    <p>Secure your land rights and access financial services</p>
+                </div>
+                <div class="use-case-card">
+                    <i class="fas fa-university"></i>
+                    <h3>Banks & Lenders</h3>
+                    <p>Verify land ownership and reduce lending risks</p>
+                </div>
+                <div class="use-case-card">
+                    <i class="fas fa-landmark"></i>
+                    <h3>Government & Regulators</h3>
+                    <p>Streamline land administration and reduce fraud</p>
+                </div>
+                <div class="use-case-card">
+                    <i class="fas fa-hands-helping"></i>
+                    <h3>NGOs & Development Agencies</h3>
+                    <p>Support land rights and post-conflict reconstruction</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="how-it-works">
+        <div class="section-content">
+            <h2>How It Works</h2>
+            <div class="steps-container">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <i class="fas fa-user-check"></i>
+                    <h3>Register & Verify Identity</h3>
+                    <p>Create your SSI-based digital identity and complete KYC verification</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <i class="fas fa-file-upload"></i>
+                    <h3>Upload Land Documents</h3>
+                    <p>Securely upload and verify your land ownership documents</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <i class="fas fa-map-marked-alt"></i>
+                    <h3>Geo-tag & Map</h3>
+                    <p>Accurately map and verify land boundaries using GIS technology</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <i class="fas fa-link"></i>
+                    <h3>Tokenize & Record</h3>
+                    <p>Create digital tokens representing your land ownership on the blockchain</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials">
+        <div class="section-content">
+            <h2>What Our Users Say</h2>
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <div class="testimonial-content">
+                        <i class="fas fa-quote-left"></i>
+                        <p>SwaBhoomi has revolutionized how we manage our agricultural land. The transparency and security are unmatched.</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Rajesh Kumar">
+                        <div class="author-info">
+                            <h4>Rajesh Kumar</h4>
+                            <p>Farmer, Punjab</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-content">
+                        <i class="fas fa-quote-left"></i>
+                        <p>As a bank, we've seen a significant reduction in fraud cases since implementing SwaBhoomi's verification system.</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Priya Sharma">
+                        <div class="author-info">
+                            <h4>Priya Sharma</h4>
+                            <p>Bank Manager, Mumbai</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-content">
+                        <i class="fas fa-quote-left"></i>
+                        <p>The platform has made land registration so much easier for our rural clients. Truly a game-changer!</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <img src="https://randomuser.me/api/portraits/men/67.jpg" alt="Amit Patel">
+                        <div class="author-info">
+                            <h4>Amit Patel</h4>
+                            <p>NGO Director, Gujarat</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact-section">
+        <div class="section-content">
+            <h2>Visit Us</h2>
+            <div class="contact-grid">
+                <div class="contact-info">
+                    <div class="info-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <div class="info-content">
+                            <h3>Our Location</h3>
+                            <p>VIPSTC, Delhi, India</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-clock"></i>
+                        <div class="info-content">
+                            <h3>Working Hours</h3>
+                            <p>Mon - Fri: 7:00 AM - 8:00 PM</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-phone"></i>
+                        <div class="info-content">
+                            <h3>Contact Us</h3>
+                            <p>+91 9999777772</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-envelope"></i>
+                        <div class="info-content">
+                            <h3>Email Us</h3>
+                            <p>contact@swabhoomi.com</p>
+                        </div>
+                    </div>
+                </div>
+                <form class="contact-form">
+                    <h3>Send Us a Message</h3>
+                    <div class="form-group">
+                        <input type="text" placeholder="Your Name" required>
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="form-group">
+                        <input type="email" placeholder="Your Email" required>
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="form-group">
+                        <textarea placeholder="Your Message" required></textarea>
+                        <i class="fas fa-comment"></i>
+                    </div>
+                    <button type="submit" class="submit-btn">
+                        <span>Send Message</span>
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Team Bhen Code</h3>
+                <p>Building the future of land registry</p>
+            </div>
+            <div class="footer-section">
+                <h3>Contact</h3>
+                <a href="mailto:contact@swabhoomi.com">contact@swabhoomi.com</a>
+                <a href="tel:+911234567890">+91 1234567890</a>
+            </div>
+            <div class="footer-section">
+                <h3>Links</h3>
+                <a href="#privacy">Privacy Policy</a>
+                <a href="https://github.com/teambhencode" target="_blank">GitHub</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 SwaBhoomi. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        function checkLogin() {
+            {% if not session.get('user_id') %}
+                alert('Please login to access this feature');
+                window.location.href = '/login';
+                return false;
+            {% endif %}
+            return true;
+        }
+    </script>
+</body>
+</html> 

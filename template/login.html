@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Login - SwaBhoomi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        .login-container {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 2rem 0;
+        }
+        .login-card {
+            max-width: 500px;
+            margin: auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            padding: 2.5rem;
+        }
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .login-logo {
+            width: 120px;
+            margin-bottom: 1rem;
+        }
+        .login-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+        }
+        .login-subtitle {
+            color: #718096;
+            margin-bottom: 2rem;
+        }
+        .did-button {
+            width: 100%;
+            padding: 0.8rem;
+            background: #4a5568;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        .did-button:hover {
+            background: #2d3748;
+            transform: translateY(-2px);
+        }
+        .divider {
+            text-align: center;
+            margin: 1.5rem 0;
+            position: relative;
+        }
+        .divider::before, .divider::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            width: 45%;
+            height: 1px;
+            background: #e2e8f0;
+        }
+        .divider::before { left: 0; }
+        .divider::after { right: 0; }
+        .form-control {
+            padding: 0.8rem;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+        }
+        .form-control:focus {
+            border-color: #4a5568;
+            box-shadow: 0 0 0 2px rgba(74, 85, 104, 0.2);
+        }
+        .btn-primary {
+            background: #4299e1;
+            border: none;
+            padding: 0.8rem;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            background: #3182ce;
+            transform: translateY(-2px);
+        }
+        .alert {
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+        }
+        #walletModal .modal-content {
+            border-radius: 20px;
+            padding: 1.5rem;
+        }
+        .qr-code-container {
+            text-align: center;
+            padding: 1.5rem;
+            background: #f7fafc;
+            border-radius: 10px;
+            margin: 1rem 0;
+        }
+        .qr-code {
+            width: 200px;
+            height: 200px;
+            margin: auto;
+            background: #fff;
+            padding: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="container">
+            <div class="login-card">
+                <div class="login-header">
+                    <img src="{{ url_for('static', filename='sblg-removebg (1).png') }}" alt="SwaBhoomi Logo" class="login-logo">
+                    <h2 class="login-title">Welcome Back</h2>
+                    <p class="login-subtitle">Login to manage your land registry</p>
+                </div>
+
+                <!-- Flash Messages -->
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        <div class="alert alert-danger">
+                            <ul class="mb-0">
+                                {% for message in messages %}
+                                    <li>{{ message }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+                {% endwith %}
+
+                <!-- DID Login Button -->
+                <button class="did-button" onclick="openWalletModal()">
+                    <i class="fas fa-wallet"></i>
+                    Login with Digital Identity Wallet
+                </button>
+
+                <div class="divider">
+                    <span class="bg-white px-3 text-muted">or</span>
+                </div>
+
+                <!-- Traditional Login Form -->
+                <form action="/login" method="POST">
+                    {{ form.hidden_tag() }}
+
+                    <div class="mb-3">
+                        {{ form.email.label(class_='form-label') }}
+                        {{ form.email(class='form-control', placeholder='Enter your email') }}
+                        {% if form.email.errors %}
+                            <ul class="text-danger">
+                                {% for error in form.email.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-4">
+                        {{ form.password.label(class_='form-label') }}
+                        {{ form.password(class='form-control', placeholder='Enter your password') }}
+                        {% if form.password.errors %}
+                            <ul class="text-danger">
+                                {% for error in form.password.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        {{ form.submit(class_='btn btn-primary btn-lg') }}
+                        <a href="/register" class="btn btn-outline-secondary">Create New Account</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wallet Connection Modal -->
+    <div class="modal fade" id="walletModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title">Connect Your Wallet</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="qr-code-container">
+                        <div class="qr-code">
+                            <!-- Placeholder for QR Code -->
+                            <i class="fas fa-qrcode fa-5x text-muted"></i>
+                        </div>
+                        <p class="mt-3 mb-0 text-muted">Scan with your digital identity wallet</p>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button class="did-button" onclick="connectWallet()">
+                            <i class="fas fa-plug"></i>
+                            Connect Browser Wallet
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function openWalletModal() {
+            var modal = new bootstrap.Modal(document.getElementById('walletModal'));
+            modal.show();
+        }
+
+        function connectWallet() {
+            // Placeholder for wallet connection logic
+            alert('Wallet connection feature coming soon!');
+        }
+
+        // Toast notifications
+        function showToast(message, type = 'success') {
+            // Implementation for toast notifications
+        }
+    </script>
+</body>
+</html>
