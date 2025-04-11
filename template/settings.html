@@ -1,124 +1,356 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Settings - SwaBhoomi</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: #4f46e5;
+            --primary-hover: #4338ca;
+            --secondary-color: #6b7280;
+            --background-color: #f3f4f6;
+            --card-background: #ffffff;
+            --text-primary: #111827;
+            --text-secondary: #4b5563;
+            --border-color: #e5e7eb;
+            --danger-color: #ef4444;
+            --danger-hover: #dc2626;
+        }
+
         body {
-            background: #f7fafc;
+            background: var(--background-color);
             min-height: 100vh;
+            color: var(--text-primary);
         }
-        
-        .settings-container {
-            max-width: 800px;
-            margin: 2rem auto;
-            padding: 2rem;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            padding: 48px;
+            background-color: var(--card-background);
+            border-right: 1px solid var(--border-color);
+            width: 250px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
-        
-        .settings-header {
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+            border-radius: 12px;
             margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #e2e8f0;
         }
-        
+
+        .logo-container img {
+            height: 40px;
+            margin-right: 12px;
+        }
+
+        .logo-container h5 {
+            color: white;
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 5px;
+            transition: all 0.3s;
+        }
+
+        .nav-link:hover {
+            background-color: var(--background-color);
+            color: var(--primary-color);
+        }
+
+        .nav-link.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
         .settings-section {
-            margin-bottom: 2rem;
+            background: var(--card-background);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
         }
-        
-        .settings-section h3 {
-            color: #2d3748;
-            margin-bottom: 1rem;
+
+        .section-title {
+            color: var(--text-primary);
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--border-color);
         }
-        
-        .settings-card {
-            background: #f8fafc;
-            border-radius: 10px;
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-        }
-        
-        .settings-card h4 {
+
+        .form-label {
+            font-weight: 500;
             color: #4a5568;
-            margin-bottom: 1rem;
         }
-        
-        .btn-danger {
-            background: #f56565;
+
+        .btn-primary {
+            background-color: var(--primary-color);
             border: none;
-            padding: 0.8rem 1.5rem;
-            border-radius: 10px;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s;
         }
-        
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
         .btn-danger:hover {
-            background: #e53e3e;
+            background-color: var(--danger-hover);
+            transform: translateY(-1px);
+        }
+
+        .welcome-text {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                position: relative;
+                padding: 20px;
+            }
+            .main-content {
+                margin-left: 0;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="settings-container">
-        <div class="settings-header">
-            <h2>Account Settings</h2>
-            <p class="text-muted">Manage your account preferences and security settings</p>
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="sidebar-sticky">
+            <div class="logo-container">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="SwaBhoomi Logo">
+                <h5>SwaBhoomi</h5>
+            </div>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link" href="/dashboard">
+                        <i class="fas fa-home me-2"></i>Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/digital-identity">
+                        <i class="fas fa-id-card me-2"></i>Digital Identity
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/land-registry">
+                        <i class="fas fa-map-marked-alt me-2"></i>Land Registry
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/transactions">
+                        <i class="fas fa-exchange-alt me-2"></i>Transactions
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/documents">
+                        <i class="fas fa-file-alt me-2"></i>Documents
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/settings">
+                        <i class="fas fa-cog me-2"></i>Settings
+                    </a>
+                </li>
+            </ul>
         </div>
+    </nav>
 
-        <!-- Account Information -->
-        <div class="settings-section">
-            <h3>Account Information</h3>
-            <div class="settings-card">
-                <h4>Personal Details</h4>
-                <p><strong>Name:</strong> {{ current_user.name }}</p>
-                <p><strong>Email:</strong> {{ current_user.email }}</p>
-                <button class="btn btn-outline-primary">Edit Profile</button>
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">Settings</h1>
+                <div class="d-flex align-items-center">
+                    <span class="me-3">Welcome, {{ current_user.name }}</span>
+                    <a href="/logout" class="btn btn-outline-danger">
+                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                    </a>
+                </div>
+            </div>
+
+            <!-- Account Information -->
+            <div class="settings-section">
+                <h2 class="section-title">Account Information</h2>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" class="form-control" value="{{ current_user.name }}" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" value="{{ current_user.email }}" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Digital Identity (DID)</label>
+                            <input type="text" class="form-control" value="{{ current_user.did if current_user.did else 'Not Connected' }}" readonly>
+                        </div>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#connectWalletModal">
+                            <i class="fas fa-wallet me-2"></i>Connect Digital Identity Wallet
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Settings -->
+            <div class="settings-section">
+                <h2 class="section-title">Security Settings</h2>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Change Password</label>
+                            <input type="password" class="form-control" placeholder="Current Password">
+                        </div>
+                        <div class="mb-3">
+                            <input type="password" class="form-control" placeholder="New Password">
+                        </div>
+                        <div class="mb-3">
+                            <input type="password" class="form-control" placeholder="Confirm New Password">
+                        </div>
+                        <button class="btn btn-primary">Update Password</button>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Two-Factor Authentication</label>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="2faSwitch">
+                                <label class="form-check-label" for="2faSwitch">Enable 2FA</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Digital Identity Management -->
+            <div class="settings-section">
+                <h2 class="section-title">Digital Identity Management</h2>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Verifiable Credentials</label>
+                            <div class="list-group">
+                                <a href="#" class="list-group-item list-group-item-action">
+                                    <i class="fas fa-id-card me-2"></i>Identity Verification
+                                </a>
+                                <a href="#" class="list-group-item list-group-item-action">
+                                    <i class="fas fa-landmark me-2"></i>Land Ownership
+                                </a>
+                                <a href="#" class="list-group-item list-group-item-action">
+                                    <i class="fas fa-file-contract me-2"></i>Property Documents
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Danger Zone -->
+            <div class="settings-section border-danger">
+                <h2 class="section-title text-danger">Danger Zone</h2>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+                                <i class="fas fa-trash me-2"></i>Delete Account
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
+    </main>
 
-        <!-- Security Settings -->
-        <div class="settings-section">
-            <h3>Security</h3>
-            <div class="settings-card">
-                <h4>Password</h4>
-                <p>Last changed: Never</p>
-                <button class="btn btn-outline-primary">Change Password</button>
-            </div>
-            <div class="settings-card">
-                <h4>Two-Factor Authentication</h4>
-                <p>Status: Not enabled</p>
-                <button class="btn btn-outline-primary">Enable 2FA</button>
+    <!-- Connect Wallet Modal -->
+    <div class="modal fade" id="connectWalletModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Connect Digital Identity Wallet</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="mb-4">
+                        <img src="https://via.placeholder.com/200" alt="QR Code" class="img-fluid">
+                    </div>
+                    <p>Scan this QR code with your digital identity wallet app to connect.</p>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-primary">
+                            <i class="fab fa-android me-2"></i>Android Wallet
+                        </button>
+                        <button class="btn btn-outline-primary">
+                            <i class="fab fa-apple me-2"></i>iOS Wallet
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
+    </div>
 
-        <!-- Digital Identity -->
-        <div class="settings-section">
-            <h3>Digital Identity</h3>
-            <div class="settings-card">
-                <h4>DID Management</h4>
-                <p><strong>Your DID:</strong> {{ current_user.did }}</p>
-                <button class="btn btn-outline-primary">Manage DID</button>
-            </div>
-        </div>
-
-        <!-- Danger Zone -->
-        <div class="settings-section">
-            <h3>Danger Zone</h3>
-            <div class="settings-card">
-                <h4>Delete Account</h4>
-                <p>Once you delete your account, there is no going back. Please be certain.</p>
-                <button class="btn btn-danger">Delete Account</button>
-            </div>
-            <div class="settings-card">
-                <h4>Logout</h4>
-                <p>Sign out of your account on this device.</p>
-                <a href="/logout" class="btn btn-outline-danger">Logout</a>
+    <!-- Delete Account Modal -->
+    <div class="modal fade" id="deleteAccountModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Delete Account</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-danger">Warning: This action cannot be undone. All your data will be permanently deleted.</p>
+                    <div class="mb-3">
+                        <label class="form-label">Enter your password to confirm</label>
+                        <input type="password" class="form-control">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger">Delete Account</button>
+                </div>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const mainContent = document.querySelector('.main-content');
+            sidebar.style.display = sidebar.style.display === 'none' ? 'block' : 'none';
+            mainContent.style.marginLeft = sidebar.style.display === 'none' ? '0' : '250px';
+        }
+    </script>
 </body>
 </html> 
