@@ -1,0 +1,702 @@
+<!-- Chatbot Component -->
+<div class="chatbot-container" id="chatbotContainer">
+    <div class="chatbot-header">
+        <div class="header-content">
+            <div class="avatar">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div class="header-text">
+                <h5>SwaBhoomi Assistant</h5>
+                <span class="status">Online</span>
+            </div>
+        </div>
+        <button class="btn-close" onclick="toggleChatbot()"></button>
+    </div>
+    <div class="chatbot-messages" id="chatbotMessages">
+        <div class="message bot welcome">
+            <div class="message-content">
+                <p>Hello! I'm your SwaBhoomi assistant. How can I help you today?</p>
+                <div class="suggestions">
+                    <button onclick="sendSuggestion('What is SwaBhoomi?')">What is SwaBhoomi?</button>
+                    <button onclick="sendSuggestion('How does SSI work?')">How does SSI work?</button>
+                    <button onclick="sendSuggestion('Can I get a loan?')">Can I get a loan?</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="chatbot-input">
+        <input type="text" id="userInput" placeholder="Type your question here..." autocomplete="off">
+        <button onclick="toggleVoiceRecognition()" id="voiceButton" title="Voice Input">
+            <i class="fas fa-microphone"></i>
+        </button>
+        <button onclick="sendMessage()" id="sendButton">
+            <i class="fas fa-paper-plane"></i>
+        </button>
+    </div>
+</div>
+
+<div class="chatbot-toggle" id="chatbotToggle" onclick="toggleChatbot()">
+    <i class="fas fa-comments"></i>
+</div>
+
+<style>
+:root {
+    --primary-color: #2563eb;
+    --primary-hover: #1d4ed8;
+    --secondary-color: #f8fafc;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --border-color: #e2e8f0;
+    --success-color: #22c55e;
+    --error-color: #ef4444;
+    --bot-message-bg: #eff6ff;
+    --user-message-bg: #2563eb;
+    --user-message-text: #ffffff;
+    --animation-duration: 0.3s;
+    --shadow-color: rgba(37, 99, 235, 0.15);
+}
+
+.chatbot-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 380px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px var(--shadow-color);
+    display: none;
+    flex-direction: column;
+    z-index: 1000;
+    transform: translateY(20px);
+    opacity: 0;
+    transition: all var(--animation-duration) ease-out;
+}
+
+.chatbot-container.visible {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.chatbot-header {
+    background: linear-gradient(135deg, var(--primary-color), #1d4ed8);
+    color: white;
+    padding: 15px;
+    border-radius: 15px 15px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(4px);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.header-text h5 {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.status {
+    font-size: 0.7rem;
+    opacity: 0.8;
+}
+
+.chatbot-messages {
+    height: 400px;
+    overflow-y: auto;
+    padding: 20px;
+    background: var(--secondary-color);
+    scroll-behavior: smooth;
+}
+
+.message {
+    margin-bottom: 15px;
+    max-width: 85%;
+    animation: messageAppear var(--animation-duration) ease-out;
+}
+
+@keyframes messageAppear {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.message-content {
+    padding: 12px 15px;
+    border-radius: 15px;
+    position: relative;
+}
+
+.message.user {
+    margin-left: auto;
+}
+
+.message.user .message-content {
+    background: var(--user-message-bg);
+    color: var(--user-message-text);
+    box-shadow: 0 2px 8px var(--shadow-color);
+    border-bottom-right-radius: 5px;
+}
+
+.message.bot {
+    margin-right: auto;
+}
+
+.message.bot .message-content {
+    background: var(--bot-message-bg);
+    color: var(--text-primary);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border-bottom-left-radius: 5px;
+}
+
+.message.welcome .message-content {
+    background: var(--bot-message-bg);
+    border-radius: 15px;
+}
+
+.suggestions {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.suggestions button {
+    background: rgba(37, 99, 235, 0.1);
+    color: var(--primary-color);
+    border: 1px solid rgba(37, 99, 235, 0.2);
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.suggestions button:hover {
+    background: rgba(37, 99, 235, 0.15);
+    border-color: rgba(37, 99, 235, 0.3);
+}
+
+.chatbot-input {
+    padding: 15px;
+    background: white;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.chatbot-input input {
+    flex: 1;
+    padding: 12px 15px;
+    border: 2px solid var(--border-color);
+    border-radius: 25px;
+    outline: none;
+    transition: all 0.3s;
+    font-size: 0.9rem;
+    background: var(--secondary-color);
+}
+
+.chatbot-input input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.chatbot-input button#voiceButton {
+    background: linear-gradient(135deg, var(--primary-color), #1d4ed8);
+    box-shadow: 0 2px 8px var(--shadow-color);
+    color: white;
+    border: none;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 5px;
+}
+
+.chatbot-input button#voiceButton:hover {
+    background: linear-gradient(135deg, #1d4ed8, #1e40af);
+    transform: translateY(-1px);
+}
+
+.chatbot-input button#voiceButton.recording {
+    background: linear-gradient(135deg, var(--error-color), #dc2626);
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.25);
+}
+
+.chatbot-input button {
+    background: linear-gradient(135deg, var(--primary-color), #1d4ed8);
+    box-shadow: 0 2px 8px var(--shadow-color);
+    color: white;
+    border: none;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chatbot-input button:hover {
+    background: linear-gradient(135deg, #1d4ed8, #1e40af);
+    transform: translateY(-1px);
+}
+
+.chatbot-input button:active {
+    transform: scale(0.95);
+}
+
+.chatbot-toggle {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, var(--primary-color), #1d4ed8);
+    box-shadow: 0 4px 15px var(--shadow-color);
+    color: white;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 1000;
+    transition: all 0.3s;
+    opacity: 1;
+    visibility: visible;
+}
+
+.chatbot-toggle:hover {
+    background: linear-gradient(135deg, #1d4ed8, #1e40af);
+    transform: translateY(-2px) rotate(10deg);
+    box-shadow: 0 6px 20px var(--shadow-color);
+}
+
+.chatbot-toggle.hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.chatbot-toggle i {
+    font-size: 1.5rem;
+}
+
+/* Scrollbar styling */
+.chatbot-messages::-webkit-scrollbar {
+    width: 6px;
+}
+
+.chatbot-messages::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.chatbot-messages::-webkit-scrollbar-thumb {
+    background: rgba(37, 99, 235, 0.2);
+    border-radius: 3px;
+}
+
+.chatbot-messages::-webkit-scrollbar-thumb:hover {
+    background: rgba(37, 99, 235, 0.3);
+}
+
+/* Typing indicator */
+.typing-indicator {
+    display: flex;
+    gap: 5px;
+    padding: 10px 15px;
+    background: rgba(37, 99, 235, 0.1);
+    border-radius: 15px;
+    width: fit-content;
+    margin-bottom: 15px;
+}
+
+.typing-indicator span {
+    width: 8px;
+    height: 8px;
+    background: var(--primary-color);
+    opacity: 0.6;
+    border-radius: 50%;
+    animation: typing 1s infinite;
+}
+
+.typing-indicator span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-indicator span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes typing {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+.voice-status {
+    position: fixed;
+    bottom: 100px;
+    right: 20px;
+    background: linear-gradient(135deg, var(--primary-color), #1d4ed8);
+    box-shadow: 0 4px 15px var(--shadow-color);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 25px;
+    display: none;
+    z-index: 1001;
+}
+</style>
+
+<script>
+// Knowledge base organized by categories
+const knowledgeBase = {
+    "general": {
+        "what is swabhoomi": "SwaBhoomi is a next-generation land registry platform using blockchain and Self-Sovereign Identity (SSI) to ensure secure, transparent, and fraud-proof land transactions in India.",
+        "who can use swabhoomi": "Any Indian citizen, government official, bank, or legal stakeholder involved in land transactions can use the platform.",
+        "is swabhoomi available nationwide": "It is currently being piloted in select regions, with a goal of scaling across India.",
+        "what makes swabhoomi different": "It uses blockchain and digital identities to create a tamper-proof, transparent system that reduces fraud and manual errors."
+    },
+    "ssi": {
+        "what is ssi": "SSI is a digital identity model where users fully control their personal information using cryptographic credentials.",
+        "how does ssi benefit landowners": "SSI ensures that only verified users can access, manage, or transfer their land rights, increasing security and privacy.",
+        "do i need aadhaar for ssi": "Aadhaar or other government IDs can be used as verifiable credentials within the SSI framework.",
+        "can i revoke access to my digital identity": "Yes, you can revoke access to your credentials at any time, preserving your privacy."
+    },
+    "blockchain": {
+        "what role does blockchain play": "Blockchain stores land records in an immutable and transparent way, making fraud or tampering nearly impossible.",
+        "can land records be changed on the blockchain": "No. Records are immutable. Any change must be recorded as a new transaction, preserving history.",
+        "is blockchain secure for legal documents": "Yes. It uses cryptographic proof to validate and protect all records.",
+        "what kind of blockchain does swabhoomi use": "SwaBhoomi uses a permissioned blockchain for better scalability and governance."
+    },
+    "ai": {
+        "how does ai detect fraud": "AI analyzes user behavior, document authenticity, and transactional anomalies to flag possible fraud attempts.",
+        "can ai catch duplicate land claims": "Yes. The system flags duplicate submissions and identity mismatches using pattern recognition.",
+        "is the ai system biased": "The AI is trained on unbiased datasets and regularly audited to maintain fairness.",
+        "will ai replace government verifiers": "No, AI supports the verification process but final authentication is governed through cryptographic proofs and legal frameworks."
+    },
+    "documents": {
+        "how do i upload land ownership documents": "You can upload them through the platform's secure portal. The system will guide you through verification.",
+        "what if my documents are in regional languages": "The platform supports multiple languages and automatically transcribes documents using OCR and NLP.",
+        "can i sell my land using swabhoomi": "Yes. Verified owners can digitally initiate ownership transfers securely.",
+        "what happens if someone else submits my land documents": "Ownership is verified against your SSI credentials and blockchain history, preventing impersonation."
+    },
+    "disputes": {
+        "how are land disputes handled": "Blockchain records create a verifiable chain of ownership, which can be used to resolve legal disputes.",
+        "can i challenge a fraudulent claim": "Yes. The platform provides a digital process to raise and verify dispute cases.",
+        "does this help post-conflict resettlement": "Absolutely. Historical ownership can be tracked and verified to resolve conflict-related disputes."
+    },
+    "geospatial": {
+        "what is geotagging in land registry": "Geotagging links plots with real-world GPS coordinates for accuracy and visualization.",
+        "how does gis integration help": "GIS helps visualize land parcels, boundaries, and zones for better clarity and compliance.",
+        "can i see my land on a digital map": "Yes. Users can view their property with boundaries, zoning, and valuation data."
+    },
+    "financial": {
+        "can this help me get a loan": "Yes. Verified land credentials can be shared with banks to process property-based loans quickly.",
+        "is my land valuation available online": "Yes. The platform uses market data to give dynamic land valuations.",
+        "are banks integrated with swabhoomi": "Selected banks are being onboarded for secure document-based loan processing."
+    },
+    "privacy": {
+        "who can see my land information": "Only you and authorized entities with your permission via SSI credentials.",
+        "can i delete my data from the system": "Blockchain records can't be deleted, but you can revoke access to your identity or credentials.",
+        "is this compliant with indian privacy laws": "Yes. The system is designed to comply with the DPDP Act and similar global privacy standards."
+    }
+};
+
+// Keywords for category detection
+const categoryKeywords = {
+    "ssi": ["ssi", "identity", "digital identity", "aadhaar", "credentials"],
+    "blockchain": ["blockchain", "immutable", "tamper", "records"],
+    "ai": ["ai", "artificial intelligence", "fraud", "detection"],
+    "documents": ["documents", "upload", "sell", "ownership"],
+    "disputes": ["disputes", "fraudulent", "claim", "conflict"],
+    "geospatial": ["geotagging", "gis", "map", "coordinates"],
+    "financial": ["loan", "bank", "valuation", "financial"],
+    "privacy": ["privacy", "data", "delete", "compliance"]
+};
+
+// Feature redirection mapping
+const featureRedirects = {
+    "digital identity": "/digital-identity",
+    "land registry": "/land-registry",
+    "transactions": "/transactions",
+    "documents": "/documents",
+    "settings": "/settings",
+    "dashboard": "/dashboard"
+};
+
+// Voice recognition setup
+let recognition = null;
+let isRecording = false;
+
+function initializeVoiceRecognition() {
+    if ('webkitSpeechRecognition' in window) {
+        recognition = new webkitSpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = 'en-US';
+
+        recognition.onstart = function() {
+            isRecording = true;
+            document.getElementById('voiceButton').classList.add('recording');
+            showVoiceStatus('Listening...');
+        };
+
+        recognition.onresult = function(event) {
+            const transcript = event.results[0][0].transcript;
+            document.getElementById('userInput').value = transcript;
+            sendMessage();
+        };
+
+        recognition.onerror = function(event) {
+            console.error('Speech recognition error:', event.error);
+            showVoiceStatus('Error: ' + event.error);
+        };
+
+        recognition.onend = function() {
+            isRecording = false;
+            document.getElementById('voiceButton').classList.remove('recording');
+            hideVoiceStatus();
+        };
+    } else {
+        console.error('Speech recognition not supported');
+        showVoiceStatus('Voice input not supported in this browser');
+    }
+}
+
+function toggleVoiceRecognition() {
+    if (!recognition) {
+        initializeVoiceRecognition();
+    }
+
+    if (isRecording) {
+        recognition.stop();
+    } else {
+        recognition.start();
+    }
+}
+
+function showVoiceStatus(message) {
+    let statusDiv = document.getElementById('voiceStatus');
+    if (!statusDiv) {
+        statusDiv = document.createElement('div');
+        statusDiv.id = 'voiceStatus';
+        statusDiv.className = 'voice-status';
+        document.body.appendChild(statusDiv);
+    }
+    statusDiv.textContent = message;
+    statusDiv.style.display = 'block';
+}
+
+function hideVoiceStatus() {
+    const statusDiv = document.getElementById('voiceStatus');
+    if (statusDiv) {
+        statusDiv.style.display = 'none';
+    }
+}
+
+function toggleChatbot() {
+    const container = document.getElementById('chatbotContainer');
+    const toggle = document.getElementById('chatbotToggle');
+    
+    if (container.style.display === 'none' || container.style.display === '') {
+        container.style.display = 'flex';
+        setTimeout(() => {
+            container.classList.add('visible');
+            toggle.classList.add('hidden');
+        }, 10);
+    } else {
+        container.classList.remove('visible');
+        setTimeout(() => {
+            container.style.display = 'none';
+            toggle.classList.remove('hidden');
+        }, 300);
+    }
+}
+
+function showTypingIndicator() {
+    const messagesContainer = document.getElementById('chatbotMessages');
+    messagesContainer.innerHTML += `
+        <div class="typing-indicator">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    `;
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+function removeTypingIndicator() {
+    const typingIndicator = document.querySelector('.typing-indicator');
+    if (typingIndicator) {
+        typingIndicator.remove();
+    }
+}
+
+function sendSuggestion(question) {
+    document.getElementById('userInput').value = question;
+    sendMessage();
+}
+
+function findBestMatch(message) {
+    message = message.toLowerCase().trim();
+    let bestMatch = "";
+    let bestMatchKey = "";
+    let bestMatchCategory = "";
+
+    // Check for feature redirection
+    for (const [feature, url] of Object.entries(featureRedirects)) {
+        if (message.includes(feature)) {
+            return { redirect: url };
+        }
+    }
+
+    // First, try to determine the category
+    let detectedCategory = "general";
+    for (const [category, keywords] of Object.entries(categoryKeywords)) {
+        if (keywords.some(keyword => message.includes(keyword))) {
+            detectedCategory = category;
+            break;
+        }
+    }
+
+    // Search within the detected category
+    for (const [key, value] of Object.entries(knowledgeBase[detectedCategory])) {
+        if (message.includes(key) && key.length > bestMatchKey.length) {
+            bestMatch = value;
+            bestMatchKey = key;
+            bestMatchCategory = detectedCategory;
+        }
+    }
+
+    // If no match found in detected category, search all categories
+    if (!bestMatch) {
+        for (const category of Object.keys(knowledgeBase)) {
+            for (const [key, value] of Object.entries(knowledgeBase[category])) {
+                if (message.includes(key) && key.length > bestMatchKey.length) {
+                    bestMatch = value;
+                    bestMatchKey = key;
+                    bestMatchCategory = category;
+                }
+            }
+        }
+    }
+
+    // If still no match, try partial matching
+    if (!bestMatch) {
+        for (const category of Object.keys(knowledgeBase)) {
+            for (const [key, value] of Object.entries(knowledgeBase[category])) {
+                const words = message.split(' ');
+                const keyWords = key.split(' ');
+                const matchCount = words.filter(word => keyWords.some(kw => kw.includes(word) || word.includes(kw))).length;
+                
+                if (matchCount > 0 && matchCount > bestMatchKey.split(' ').length) {
+                    bestMatch = value;
+                    bestMatchKey = key;
+                    bestMatchCategory = category;
+                }
+            }
+        }
+    }
+
+    return { answer: bestMatch, category: bestMatchCategory };
+}
+
+function sendMessage() {
+    const input = document.getElementById('userInput');
+    const message = input.value.trim();
+    const messagesContainer = document.getElementById('chatbotMessages');
+
+    if (message) {
+        // Add user message
+        messagesContainer.innerHTML += `
+            <div class="message user">
+                <div class="message-content">
+                    <p>${message}</p>
+                </div>
+            </div>
+        `;
+
+        // Show typing indicator
+        showTypingIndicator();
+
+        // Find best matching answer or redirect
+        const result = findBestMatch(message);
+
+        // Add bot response after a delay
+        setTimeout(() => {
+            removeTypingIndicator();
+            
+            if (result.redirect) {
+                messagesContainer.innerHTML += `
+                    <div class="message bot">
+                        <div class="message-content">
+                            <p>I'll redirect you to the ${result.redirect.split('/')[1]} section.</p>
+                        </div>
+                    </div>
+                `;
+                setTimeout(() => {
+                    window.location.href = result.redirect;
+                }, 1500);
+            } else if (result.answer) {
+                messagesContainer.innerHTML += `
+                    <div class="message bot">
+                        <div class="message-content">
+                            <p>${result.answer}</p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                messagesContainer.innerHTML += `
+                    <div class="message bot">
+                        <div class="message-content">
+                            <p>I'm sorry, I don't have information about that. Please try rephrasing your question or ask about a different topic. You can ask about:</p>
+                            <div class="suggestions">
+                                <button onclick="sendSuggestion('What is SwaBhoomi?')">What is SwaBhoomi?</button>
+                                <button onclick="sendSuggestion('How does SSI work?')">How does SSI work?</button>
+                                <button onclick="sendSuggestion('Can I get a loan?')">Can I get a loan?</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }, 1000);
+
+        input.value = '';
+    }
+}
+
+// Add event listener for Enter key
+document.getElementById('userInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        sendMessage();
+    }
+});
+
+// Initialize voice recognition when the page loads
+document.addEventListener('DOMContentLoaded', initializeVoiceRecognition);
+</script> 
