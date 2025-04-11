@@ -2,61 +2,70 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h2>Digital Identity</h2>
-    <div class="card">
-        <div class="card-body">
-            <h5 class="card-title">Your Digital Identity</h5>
-            {% if session.user_id %}
-                {% set connection = get_db() %}
-                {% if connection %}
-                    {% set cursor = connection.cursor() %}
-                    {% set _ = cursor.execute('SELECT did FROM users WHERE id = %s', (session.user_id,)) %}
-                    {% set user = cursor.fetchone() %}
-                    {% set _ = cursor.close() %}
-                    {% set _ = connection.close() %}
-                    
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-id-card me-2"></i>Digital Identity</h4>
+                </div>
+                <div class="card-body">
                     {% if user and user.did %}
-                        <div class="alert alert-success">
-                            <h6>Your Decentralized Identifier (DID):</h6>
-                            <p class="mb-0"><code>{{ user.did }}</code></p>
+                        <div class="alert alert-success d-flex align-items-center">
+                            <i class="fas fa-check-circle me-2 fs-4"></i>
+                            <div>
+                                <h5 class="alert-heading mb-1">Your Decentralized Identifier (DID)</h5>
+                                <p class="mb-0"><code class="bg-light p-2 rounded">{{ user.did }}</code></p>
+                                <button class="btn btn-sm btn-outline-success mt-2" onclick="copyToClipboard('{{ user.did }}')">
+                                    <i class="fas fa-copy me-1"></i>Copy DID
+                                </button>
+                            </div>
                         </div>
                         
-                        <h6 class="mt-4">Verifiable Credentials</h6>
-                        {% set connection = get_db() %}
-                        {% if connection %}
-                            {% set cursor = connection.cursor() %}
-                            {% set _ = cursor.execute('SELECT * FROM verifiable_credentials WHERE user_id = %s', (session.user_id,)) %}
-                            {% set credentials = cursor.fetchall() %}
-                            {% set _ = cursor.close() %}
-                            {% set _ = connection.close() %}
-                            
+                        <div class="mt-4">
+                            <h5 class="mb-3"><i class="fas fa-shield-alt me-2"></i>Verifiable Credentials</h5>
                             {% if credentials %}
                                 <div class="list-group">
                                     {% for credential in credentials %}
-                                        <div class="list-group-item">
-                                            <h6 class="mb-1">Credential Type: {{ credential.credential_type }}</h6>
-                                            <p class="mb-1"><small>Issued: {{ credential.created_at }}</small></p>
-                                            <button class="btn btn-sm btn-primary" onclick="showCredential('{{ credential.credential_data }}')">
-                                                View Credential
-                                            </button>
+                                        <div class="list-group-item list-group-item-action">
+                                            <div class="d-flex w-100 justify-content-between align-items-center">
+                                                <h6 class="mb-1">
+                                                    <i class="fas fa-certificate me-2 text-primary"></i>
+                                                    {{ credential.credential_type }}
+                                                </h6>
+                                                <small class="text-muted">{{ credential.created_at }}</small>
+                                            </div>
+                                            <div class="mt-2">
+                                                <button class="btn btn-sm btn-primary" onclick="showCredential('{{ credential.credential_data }}')">
+                                                    <i class="fas fa-eye me-1"></i>View Credential
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-secondary ms-2" onclick="downloadCredential('{{ credential.credential_data }}', '{{ credential.credential_type }}')">
+                                                    <i class="fas fa-download me-1"></i>Download
+                                                </button>
+                                            </div>
                                         </div>
                                     {% endfor %}
                                 </div>
                             {% else %}
-                                <p class="text-muted">No verifiable credentials found.</p>
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    No verifiable credentials found. Your credentials will appear here once they are issued.
+                                </div>
                             {% endif %}
-                        {% endif %}
+                        </div>
                     {% else %}
-                        <div class="alert alert-warning">
-                            <p>No DID found. Please log out and log in again to generate your DID.</p>
+                        <div class="alert alert-warning d-flex align-items-center">
+                            <i class="fas fa-exclamation-triangle me-2 fs-4"></i>
+                            <div>
+                                <h5 class="alert-heading mb-1">No DID Found</h5>
+                                <p class="mb-0">Please log out and log in again to generate your DID.</p>
+                                <a href="/logout" class="btn btn-warning btn-sm mt-2">
+                                    <i class="fas fa-sign-out-alt me-1"></i>Logout
+                                </a>
+                            </div>
                         </div>
                     {% endif %}
-                {% endif %}
-            {% else %}
-                <div class="alert alert-warning">
-                    <p>Please log in to view your digital identity.</p>
                 </div>
-            {% endif %}
+            </div>
         </div>
     </div>
 </div>
@@ -65,12 +74,18 @@
 <div class="modal fade" id="credentialModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Credential Details</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="fas fa-certificate me-2"></i>Credential Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <pre id="credentialData" class="bg-light p-3"></pre>
+                <pre id="credentialData" class="bg-light p-3 rounded"></pre>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="copyCredentialToClipboard()">
+                    <i class="fas fa-copy me-1"></i>Copy
+                </button>
             </div>
         </div>
     </div>
@@ -86,5 +101,69 @@ function showCredential(credentialData) {
         console.error('Error parsing credential:', e);
     }
 }
+
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        alert('DID copied to clipboard!');
+    }).catch(err => {
+        console.error('Failed to copy text: ', err);
+    });
+}
+
+function copyCredentialToClipboard() {
+    const credentialData = document.getElementById('credentialData').textContent;
+    navigator.clipboard.writeText(credentialData).then(() => {
+        alert('Credential copied to clipboard!');
+    }).catch(err => {
+        console.error('Failed to copy credential: ', err);
+    });
+}
+
+function downloadCredential(credentialData, credentialType) {
+    try {
+        const credential = JSON.parse(credentialData);
+        const blob = new Blob([JSON.stringify(credential, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${credentialType}-credential.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    } catch (e) {
+        console.error('Error downloading credential:', e);
+    }
+}
 </script>
+
+<style>
+.card {
+    border: none;
+    border-radius: 15px;
+}
+
+.card-header {
+    border-radius: 15px 15px 0 0 !important;
+}
+
+.list-group-item {
+    border-radius: 10px !important;
+    margin-bottom: 10px;
+    transition: all 0.3s ease;
+}
+
+.list-group-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.btn {
+    border-radius: 8px;
+}
+
+.alert {
+    border-radius: 10px;
+}
+</style>
 {% endblock %} 

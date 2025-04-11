@@ -60,6 +60,11 @@ def init_db():
             )
         """)
         
+        # Check if did column exists and add it if it doesn't
+        cursor.execute("SHOW COLUMNS FROM users LIKE 'did'")
+        if not cursor.fetchone():
+            cursor.execute("ALTER TABLE users ADD COLUMN did VARCHAR(255) UNIQUE")
+        
         # Create addresses table
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS addresses (
@@ -107,7 +112,7 @@ def init_db():
         print("Database initialized successfully!")
         return True
     except Exception as e:
-        print(f"Database initialization error: {e}")
+        print(f"Error initializing database: {str(e)}")
         return False
 
 # Initialize database on startup
@@ -242,8 +247,7 @@ def generate_verifiable_credential(user_data):
         "credentialSubject": {
             "id": user_data['did'],
             "type": "Person",
-            "givenName": user_data['first_name'],
-            "familyName": user_data['last_name'],
+            "name": user_data['name'],
             "email": user_data['email']
         }
     }
@@ -276,8 +280,8 @@ def login():
                 session['user_id'] = user['id']
                 session['email'] = user['email']
                 
-                # Generate DID if user doesn't have one
-                if not user['did']:
+                # Generate DID if user doesn't have one or if did is None
+                if 'did' not in user or not user['did']:
                     did = generate_did()
                     connection = get_db()
                     if connection:
@@ -290,8 +294,7 @@ def login():
                         # Generate verifiable credential
                         user_data = {
                             'did': did,
-                            'first_name': user['first_name'],
-                            'last_name': user['last_name'],
+                            'name': user['name'],
                             'email': user['email']
                         }
                         vc = generate_verifiable_credential(user_data)
@@ -426,7 +429,27 @@ def digital_identity():
     if 'user_id' not in session:
         flash('Please login first.')
         return redirect('/login')
-    return render_template('digital_identity.html')
+    
+    # Get user's DID
+    connection = get_db()
+    if connection:
+        cursor = connection.cursor()
+        cursor.execute('SELECT did FROM users WHERE id = %s', (session['user_id'],))
+        user = cursor.fetchone()
+        
+        # Get verifiable credentials
+        cursor.execute('SELECT * FROM verifiable_credentials WHERE user_id = %s', (session['user_id'],))
+        credentials = cursor.fetchall()
+        
+        cursor.close()
+        connection.close()
+        
+        return render_template('digital_identity.html', 
+                             user=user,
+                             credentials=credentials)
+    
+    flash('Database connection error. Please try again.')
+    return redirect('/dashboard')
 
 @app.route('/land-registry')
 def land_registry():
