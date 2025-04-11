@@ -1,10 +1,15 @@
-from flask import Flask, render_template, redirect, url_for, session, flash, request
+from flask import Flask, render_template, redirect, url_for, session, flash, request, jsonify
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, TextAreaField
 from wtforms.validators import DataRequired, Email, ValidationError
 import bcrypt
 import MySQLdb
 import MySQLdb.cursors
+import uuid
+import json
+import jwt as PyJWT
+from datetime import datetime, timedelta
+import secrets
 
 app = Flask(__name__)
 
@@ -211,45 +216,102 @@ def register():
     
     return render_template('register.html', form=form)
 
+def generate_did():
+    """Generate a unique DID for a user"""
+    # Generate a unique identifier
+    unique_id = str(uuid.uuid4())
+    # Create a DID in the format: did:swabhoomi:unique_id
+    did = f"did:swabhoomi:{unique_id}"
+    return did
+
+def generate_verifiable_credential(user_data):
+    """Generate a verifiable credential for the user"""
+    # Create a credential ID
+    credential_id = f"vc:{uuid.uuid4()}"
+    
+    # Create the credential
+    credential = {
+        "@context": [
+            "https://www.w3.org/2018/credentials/v1",
+            "https://www.w3.org/2018/credentials/identity/v1"
+        ],
+        "id": credential_id,
+        "type": ["VerifiableCredential", "IdentityCredential"],
+        "issuer": "did:swabhoomi:issuer",
+        "issuanceDate": datetime.utcnow().isoformat(),
+        "credentialSubject": {
+            "id": user_data['did'],
+            "type": "Person",
+            "givenName": user_data['first_name'],
+            "familyName": user_data['last_name'],
+            "email": user_data['email']
+        }
+    }
+    
+    # Sign the credential (in a real implementation, this would use proper cryptographic signing)
+    signed_credential = PyJWT.encode(
+        credential,
+        app.secret_key,
+        algorithm='HS256'
+    )
+    
+    return signed_credential
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        try:
-            email = form.email.data
-            password = form.password.data
-
-            conn = get_db()
-            if not conn:
-                flash('Database connection error. Please try again later.', 'error')
-                return render_template('login.html', form=form)
-
-            cursor = conn.cursor()
-            
-            # Query for user
-            cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
+        email = form.email.data
+        password = form.password.data
+        
+        connection = get_db()
+        if connection:
+            cursor = connection.cursor()
+            cursor.execute('SELECT * FROM users WHERE email = %s', (email,))
             user = cursor.fetchone()
             cursor.close()
-            conn.close()
-
-            if user:
-                stored_password = user['password']
-                if isinstance(stored_password, str):
-                    stored_password = stored_password.encode('utf-8')
-                
-                if bcrypt.checkpw(password.encode('utf-8'), stored_password):
-                    session['user_id'] = user['id']
-                    session['user_name'] = user['name']
-                    flash('Login successful!', 'success')
-                    return redirect('/dashboard')
+            connection.close()
             
-            flash('Invalid email or password', 'error')
-            return render_template('login.html', form=form)
-
-        except Exception as e:
-            print(f"Login error: {e}")
-            flash('An error occurred during login. Please try again.', 'error')
-            return render_template('login.html', form=form)
+            if user and bcrypt.checkpw(password.encode('utf-8'), user['password'].encode('utf-8')):
+                session['user_id'] = user['id']
+                session['email'] = user['email']
+                
+                # Generate DID if user doesn't have one
+                if not user['did']:
+                    did = generate_did()
+                    connection = get_db()
+                    if connection:
+                        cursor = connection.cursor()
+                        cursor.execute('UPDATE users SET did = %s WHERE id = %s', (did, user['id']))
+                        connection.commit()
+                        cursor.close()
+                        connection.close()
+                        
+                        # Generate verifiable credential
+                        user_data = {
+                            'did': did,
+                            'first_name': user['first_name'],
+                            'last_name': user['last_name'],
+                            'email': user['email']
+                        }
+                        vc = generate_verifiable_credential(user_data)
+                        
+                        # Store the credential
+                        connection = get_db()
+                        if connection:
+                            cursor = connection.cursor()
+                            cursor.execute(
+                                'INSERT INTO verifiable_credentials (user_id, credential_type, credential_data) VALUES (%s, %s, %s)',
+                                (user['id'], 'identity', vc)
+                            )
+                            connection.commit()
+                            cursor.close()
+                            connection.close()
+                
+                flash('Login successful!', 'success')
+                return redirect(url_for('dashboard'))
+            else:
+                flash('Invalid email or password', 'error')
     
     return render_template('login.html', form=form)
 
@@ -427,5 +489,12 @@ def test_db():
     except Exception as e:
         return f"Error: {str(e)}"
 
+def login_required(f):
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5000)

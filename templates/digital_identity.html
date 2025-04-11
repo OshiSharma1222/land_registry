@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Digital Identity</h2>
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Your Digital Identity</h5>
+            {% if session.user_id %}
+                {% set connection = get_db() %}
+                {% if connection %}
+                    {% set cursor = connection.cursor() %}
+                    {% set _ = cursor.execute('SELECT did FROM users WHERE id = %s', (session.user_id,)) %}
+                    {% set user = cursor.fetchone() %}
+                    {% set _ = cursor.close() %}
+                    {% set _ = connection.close() %}
+                    
+                    {% if user and user.did %}
+                        <div class="alert alert-success">
+                            <h6>Your Decentralized Identifier (DID):</h6>
+                            <p class="mb-0"><code>{{ user.did }}</code></p>
+                        </div>
+                        
+                        <h6 class="mt-4">Verifiable Credentials</h6>
+                        {% set connection = get_db() %}
+                        {% if connection %}
+                            {% set cursor = connection.cursor() %}
+                            {% set _ = cursor.execute('SELECT * FROM verifiable_credentials WHERE user_id = %s', (session.user_id,)) %}
+                            {% set credentials = cursor.fetchall() %}
+                            {% set _ = cursor.close() %}
+                            {% set _ = connection.close() %}
+                            
+                            {% if credentials %}
+                                <div class="list-group">
+                                    {% for credential in credentials %}
+                                        <div class="list-group-item">
+                                            <h6 class="mb-1">Credential Type: {{ credential.credential_type }}</h6>
+                                            <p class="mb-1"><small>Issued: {{ credential.created_at }}</small></p>
+                                            <button class="btn btn-sm btn-primary" onclick="showCredential('{{ credential.credential_data }}')">
+                                                View Credential
+                                            </button>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="text-muted">No verifiable credentials found.</p>
+                            {% endif %}
+                        {% endif %}
+                    {% else %}
+                        <div class="alert alert-warning">
+                            <p>No DID found. Please log out and log in again to generate your DID.</p>
+                        </div>
+                    {% endif %}
+                {% endif %}
+            {% else %}
+                <div class="alert alert-warning">
+                    <p>Please log in to view your digital identity.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal for displaying credential details -->
+<div class="modal fade" id="credentialModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Credential Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <pre id="credentialData" class="bg-light p-3"></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showCredential(credentialData) {
+    try {
+        const credential = JSON.parse(credentialData);
+        document.getElementById('credentialData').textContent = JSON.stringify(credential, null, 2);
+        new bootstrap.Modal(document.getElementById('credentialModal')).show();
+    } catch (e) {
+        console.error('Error parsing credential:', e);
+    }
+}
+</script>
+{% endblock %} 
